@@ -4,325 +4,504 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Text to Cards</title>
+    <title>Arbiter — Messy text in, clean card out</title>
+    <meta name="description" content="Paste a poster, WhatsApp forward, email or posting. Instantly extract dates, venue, money, eligibility and links in one clean card.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0d0f15;
-            --bg-glow: #151a2b;
-            --panel: #141722;
-            --card: #171b28;
-            --card-2: #1c2132;
-            --border: #262c40;
-            --text: #e8eaf2;
-            --muted: #8d95ad;
-            --accent: #7c8cff;
-            --accent-2: #5eead4;
-            --danger: #ff7b8a;
-            --radius: 16px;
+            --bg: #fbf8f1;
+            --bg-card: #fbf8f1;
+            --surface: #ffffff;
+            --textarea-bg: #f4f1ea;
+            --border: #e6e0d4;
+            --border-light: #ece7de;
+            --text: #18181b;
+            --text-secondary: #52525b;
+            --muted: #71717a;
+            
+            /* Reference palette */
+            --accent-coral: #f26f55;
+            --accent-coral-hover: #e05b3e;
+            --accent-lime: #cbee38;
+            --accent-lime-cream: #f6fae8;
+            --accent-dark: #261338;
+            --accent-dark-hover: #3a1c54;
+            --sec-bg: #ede5f8;
+            --sec-border: #dfd4f2;
+            --accent-link: #008fa0;
+
+            --radius: 24px;
+            --radius-sm: 18px;
+            --radius-xs: 12px;
         }
 
         * {
             box-sizing: border-box;
-        }
-
-        html,
-        body {
             margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-            background: radial-gradient(1000px 500px at 50% -10%, var(--bg-glow), var(--bg));
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            line-height: 1.5;
+            line-height: 1.6;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        .wrap {
-            max-width: 940px;
+        /* ===================== FIXED NAVBAR ===================== */
+        .nav-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(251, 248, 241, 0.92);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1040px;
             margin: 0 auto;
-            padding: 40px 20px 80px;
+            padding: 18px 28px;
         }
 
-        header h1 {
-            font-size: 28px;
-            margin: 0 0 6px;
-            letter-spacing: -0.02em;
+        /* Aesthetic Arbiter Logo */
+        .nav-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 21px;
+            font-weight: 900;
+            letter-spacing: -0.035em;
+            transition: opacity 0.2s;
         }
 
-        header h1 span {
-            color: var(--accent);
+        .nav-logo:hover {
+            opacity: 0.85;
         }
 
-        header p {
-            margin: 0;
-            color: var(--muted);
+        .logo-badge {
+            width: 30px;
+            height: 30px;
+            background: var(--accent-dark);
+            color: var(--accent-lime);
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            box-shadow: 0 2px 8px rgba(38, 19, 56, 0.2);
+        }
+
+        .logo-name {
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -0.03em;
+        }
+
+        .logo-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--accent-coral);
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: -7px;
+            margin-top: 8px;
+        }
+
+        /* Circled Nav Links */
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 8px 18px;
+            border: 1.5px solid #ded6c9;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.6);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+            border-color: #baa795;
+            background: var(--surface);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            transform: translateY(-1px);
+        }
+
+        /* ===================== HERO ===================== */
+        .hero {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 108px 28px 0; /* extra top padding for fixed navbar */
+        }
+
+        .hero-title {
+            font-size: clamp(42px, 7vw, 70px);
+            font-weight: 900;
+            line-height: 1.08;
+            letter-spacing: -0.035em;
+            color: var(--text);
+            margin-bottom: 24px;
+        }
+
+        .hero-title .highlight {
+            background: var(--accent-lime);
+            padding: 2px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            color: var(--text);
+        }
+
+        /* Subtitle is explicitly bold */
+        .hero-sub {
+            font-size: 17px;
+            color: var(--text);
             max-width: 640px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            font-weight: 700;
         }
 
+        /* ===================== INPUT PANEL ===================== */
         .input-panel {
-            margin-top: 26px;
-            background: var(--panel);
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 28px 50px;
+        }
+
+        .input-card {
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
         }
 
         textarea {
             width: 100%;
-            min-height: 170px;
+            min-height: 180px;
             resize: vertical;
-            background: #0f121b;
+            background: var(--textarea-bg);
             color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px;
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 18px 20px;
             font: inherit;
-            font-size: 14.5px;
+            font-size: 15px;
             outline: none;
-            transition: border-color .15s, box-shadow .15s;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            line-height: 1.6;
         }
 
         textarea:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(124, 140, 255, .15);
+            border-color: #baa795;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
         }
 
         textarea::placeholder {
-            color: #566079;
+            color: #a39c90;
         }
 
         .bar {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
-            margin-top: 12px;
+            margin-top: 16px;
             flex-wrap: wrap;
         }
 
         .bar .count {
             margin-left: auto;
             color: var(--muted);
-            font-size: 12.5px;
+            font-size: 13.5px;
+            font-weight: 500;
         }
 
+        /* ===================== BUTTONS ===================== */
         button {
             font: inherit;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            border-radius: 10px;
-            padding: 10px 16px;
-            border: 1px solid var(--border);
-            background: var(--card-2);
+            border-radius: 999px;
+            padding: 11px 24px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
             color: var(--text);
-            transition: transform .06s, background .15s, border-color .15s, opacity .15s;
+            transition: all 0.15s ease;
         }
 
         button:hover {
-            border-color: #3a4263;
-            background: #222842;
+            border-color: #d1c8bb;
+            background: #f4efe7;
         }
 
         button:active {
-            transform: translateY(1px);
+            transform: scale(0.98);
         }
 
+        /* High-visibility primary Extract details button */
         button.primary {
-            background: linear-gradient(135deg, #7c8cff, #6272f0);
+            background: var(--accent-coral);
             border-color: transparent;
-            color: #0b0d14;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 12px 28px;
+            opacity: 1;
+            box-shadow: 0 4px 16px rgba(242, 111, 85, 0.35);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         button.primary:hover {
-            background: linear-gradient(135deg, #8d9bff, #7081f5);
+            opacity: 1;
+            background: var(--accent-coral-hover);
+            box-shadow: 0 6px 22px rgba(242, 111, 85, 0.45);
+            transform: translateY(-1px);
         }
 
         button:disabled {
-            opacity: .55;
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
 
-        button.small {
-            padding: 6px 11px;
-            font-size: 12.5px;
-            font-weight: 500;
+        /* ===================== STATUS ===================== */
+        .status-container {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 28px;
         }
 
         .status {
-            margin-top: 22px;
+            margin-bottom: 24px;
         }
 
         .error {
-            background: rgba(255, 123, 138, .08);
-            border: 1px solid rgba(255, 123, 138, .35);
-            color: #ffc2c9;
-            padding: 12px 14px;
-            border-radius: 12px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 14px 20px;
+            border-radius: var(--radius-xs);
             font-size: 14px;
+            font-weight: 500;
         }
 
         .loading {
             display: flex;
             align-items: center;
-            gap: 12px;
-            color: var(--muted);
-            padding: 10px 2px;
+            gap: 14px;
+            color: var(--text-secondary);
+            padding: 14px 4px;
+            font-weight: 600;
         }
 
         .spinner {
-            width: 18px;
-            height: 18px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
-            border: 2px solid #2c3350;
-            border-top-color: var(--accent);
-            animation: spin .8s linear infinite;
+            border: 2.5px solid var(--border);
+            border-top-color: var(--accent-dark);
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===================== PLACEHOLDER SECTION (LIME & CREAMY) ===================== */
+        .placeholder-section {
+            background: linear-gradient(180deg, #fbf8f1 0%, #f6fae8 50%, #f5fae5 100%);
+            width: 100%;
+            padding: 60px 28px 70px;
+            transition: all 0.3s ease;
+            border-top: 1px solid rgba(203, 238, 56, 0.28);
+            border-bottom: 1px solid rgba(203, 238, 56, 0.28);
+        }
+
+        .placeholder-wrapper {
+            max-width: 1040px;
+            margin: 0 auto;
+        }
+
+        .placeholder-box {
+            border: 2px dashed #bedb68;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: var(--radius);
+            padding: 60px 24px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(197, 232, 60, 0.08);
+        }
+
+        .placeholder-box h3 {
+            color: #192308;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.015em;
+            margin-bottom: 8px;
+        }
+
+        .placeholder-box p {
+            color: #556329;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* ===================== RESULTS SECTION (EXTRACTED CARDS) ===================== */
+        .results-section {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 20px 28px 60px;
         }
 
         .results-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin: 28px 0 12px;
+            margin-bottom: 24px;
         }
 
         .results-head h2 {
-            font-size: 15px;
-            margin: 0;
+            font-size: 13px;
             color: var(--muted);
-            font-weight: 600;
-            letter-spacing: .02em;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
+        /* ===================== EXTRACTED CARD (AS PER CARDS.PNG) ===================== */
         .card {
-            background: linear-gradient(180deg, var(--card), #151926);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 22px;
-            margin-bottom: 18px;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
-            animation: rise .35s ease both;
+            padding: 36px 36px 28px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.04);
+            animation: rise 0.4s ease both;
         }
 
         @keyframes rise {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
-            }
-
-            to {
-                opacity: 1;
-                transform: none;
-            }
-        }
-
-        .card::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 18px;
-            bottom: 18px;
-            width: 3px;
-            border-radius: 3px;
-            background: var(--tc, var(--accent));
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: none; }
         }
 
         .card-top {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             align-items: center;
             flex-wrap: wrap;
+            margin-bottom: 18px;
         }
 
-        .spacer {
-            flex: 1;
-        }
+        .spacer { flex: 1; }
 
         .badge {
-            font-size: 11.5px;
-            font-weight: 700;
-            letter-spacing: .06em;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            padding: 4px 10px;
+            padding: 6px 16px;
             border-radius: 999px;
-            border: 1px solid transparent;
-            color: var(--tc, var(--accent));
-            background: color-mix(in srgb, var(--tc, var(--accent)) 14%, transparent);
-            border-color: color-mix(in srgb, var(--tc, var(--accent)) 35%, transparent);
+            background: var(--accent-dark);
+            color: #ffffff;
+            border: none;
         }
 
         .urg {
             font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
+            font-weight: 700;
+            padding: 5px 14px;
             border-radius: 999px;
+            background: var(--accent-lime);
+            color: #1e2806;
         }
 
         .urg.high {
-            color: #ffb4bd;
-            background: rgba(255, 123, 138, .12);
-            border: 1px solid rgba(255, 123, 138, .35);
+            color: #991b1b;
+            background: #fecaca;
         }
 
         .urg.medium {
-            color: #ffd592;
-            background: rgba(255, 189, 89, .1);
-            border: 1px solid rgba(255, 189, 89, .3);
+            color: #92400e;
+            background: #fde68a;
         }
 
         .urg.low {
-            color: #9de9c8;
-            background: rgba(94, 234, 160, .08);
-            border: 1px solid rgba(94, 234, 160, .25);
+            color: #1e2806;
+            background: var(--accent-lime);
         }
 
         .urg.past {
             color: var(--muted);
-            background: rgba(141, 149, 173, .1);
-            border: 1px solid var(--border);
+            background: #e5e5e5;
         }
 
         .title {
-            font-size: 21px;
-            font-weight: 700;
-            margin: 14px 0 2px;
-            letter-spacing: -0.01em;
+            font-size: clamp(26px, 4vw, 34px);
+            font-weight: 800;
+            margin: 0 0 6px;
+            letter-spacing: -0.025em;
+            color: var(--text);
+            line-height: 1.2;
         }
 
         .org {
             color: var(--muted);
-            font-size: 14px;
+            font-size: 15px;
+            margin-bottom: 14px;
+            font-weight: 500;
         }
 
         .tldr {
-            margin: 12px 0 0;
+            margin: 0 0 24px;
             font-size: 15px;
-            color: #cfd3e3;
+            color: var(--text-secondary);
+            line-height: 1.6;
         }
 
+        /* ===================== SUB-SECTIONS GRID ===================== */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 14px;
-            margin-top: 18px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
         }
 
         .sec {
-            background: var(--card-2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px 15px;
+            background: var(--sec-bg);
+            border: 1px solid var(--sec-border);
+            border-radius: var(--radius-sm);
+            padding: 20px 20px;
         }
 
         .sec.wide {
@@ -330,42 +509,44 @@
         }
 
         .sec h3 {
-            margin: 0 0 9px;
-            font-size: 11.5px;
-            letter-spacing: .09em;
+            margin: 0 0 14px;
+            font-size: 11px;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: var(--muted);
-            font-weight: 700;
+            color: #4b3e65;
+            font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 8px;
         }
 
         .sec h3 .ic {
-            font-size: 13px;
-            filter: saturate(.8);
+            font-size: 14px;
         }
 
         .row {
             display: flex;
             justify-content: space-between;
+            align-items: baseline;
             gap: 12px;
-            padding: 5px 0;
+            padding: 8px 0;
             font-size: 14px;
         }
 
-        .row+.row {
-            border-top: 1px dashed #2a3047;
+        .row + .row {
+            border-top: 1px solid rgba(110, 80, 150, 0.12);
         }
 
         .row .k {
             color: var(--muted);
             flex-shrink: 0;
+            font-weight: 500;
         }
 
         .row .v {
             text-align: right;
-            font-weight: 500;
+            font-weight: 700;
+            color: var(--text);
         }
 
         .row .v small {
@@ -373,23 +554,39 @@
             color: var(--muted);
             font-weight: 400;
             font-size: 12px;
+            margin-top: 2px;
         }
 
         ul.plain {
             margin: 0;
-            padding-left: 18px;
-            font-size: 14px;
+            padding: 0;
+            list-style: none;
         }
 
         ul.plain li {
-            margin: 3px 0;
+            position: relative;
+            padding-left: 14px;
+            margin: 6px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        ul.plain li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--text);
+            font-weight: bold;
         }
 
         .ev {
             cursor: help;
-            border-bottom: 1px dotted #55608a;
+            border-bottom: 1px dotted var(--muted);
         }
 
+        /* ===================== LINKS ===================== */
         .link {
             display: block;
             padding: 8px 0;
@@ -397,14 +594,14 @@
             color: inherit;
         }
 
-        .link+.link {
-            border-top: 1px dashed #2a3047;
+        .link + .link {
+            border-top: 1px solid rgba(110, 80, 150, 0.12);
         }
 
         .link .l1 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--accent);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-link);
             display: flex;
             gap: 6px;
             align-items: center;
@@ -416,46 +613,46 @@
         }
 
         .link .l2 {
-            font-size: 12.5px;
+            font-size: 13px;
             color: var(--muted);
-            margin-top: 2px;
-        }
-
-        .link .l3 {
-            font-size: 12px;
-            color: #6a7392;
-            margin-top: 1px;
+            margin-top: 3px;
             word-break: break-all;
         }
 
+        /* ===================== TODO ===================== */
         .todo {
             display: flex;
-            gap: 10px;
-            align-items: flex-start;
-            padding: 5px 0;
+            gap: 12px;
+            align-items: center;
+            padding: 6px 0;
             font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
         }
 
         .todo input {
-            margin-top: 4px;
-            accent-color: var(--accent-2);
-            width: 16px;
-            height: 16px;
+            accent-color: var(--accent-dark);
+            width: 17px;
+            height: 17px;
+            border-radius: 4px;
         }
 
-        .todo input:checked+span {
+        .todo input:checked + span {
             color: var(--muted);
             text-decoration: line-through;
         }
 
+        /* ===================== SOURCES ===================== */
         details {
-            margin-top: 14px;
+            margin-top: 20px;
         }
 
         summary {
             cursor: pointer;
             color: var(--muted);
             font-size: 13px;
+            font-weight: 600;
         }
 
         summary:hover {
@@ -463,9 +660,12 @@
         }
 
         .src {
-            margin-top: 8px;
+            margin-top: 10px;
             font-size: 13px;
             color: var(--muted);
+            background: rgba(0, 0, 0, 0.02);
+            padding: 12px 16px;
+            border-radius: var(--radius-xs);
         }
 
         .src div {
@@ -473,103 +673,517 @@
         }
 
         .src b {
-            color: #b7bdd6;
+            color: var(--text-secondary);
             text-transform: capitalize;
         }
 
+        /* ===================== CARD FOOTER ===================== */
         .card-foot {
             display: flex;
-            gap: 8px;
-            margin-top: 16px;
+            gap: 12px;
+            margin-top: 24px;
+            align-items: center;
         }
 
+        .btn-copy-dark {
+            background: var(--accent-dark);
+            color: #ffffff;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 11px 24px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-copy-dark:hover {
+            background: var(--accent-dark-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-copy-outline {
+            background: transparent;
+            color: var(--muted);
+            border: 1.5px solid var(--border);
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 10px 18px;
+            cursor: pointer;
+        }
+
+        .btn-copy-outline:hover {
+            border-color: #baa795;
+            color: var(--text);
+        }
+
+        /* ===================== SAMPLE SECTION (NOW BELOW, LIME GREEN) ===================== */
+        .sample-section {
+            background-color: var(--accent-lime);
+            width: 100%;
+            padding: 70px 28px;
+        }
+
+        .sample-wrapper {
+            max-width: 1040px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .sample-left {
+            flex: 1 1 380px;
+            max-width: 460px;
+        }
+
+        .sample-tag {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #1a2205;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .sample-left h2 {
+            font-size: clamp(32px, 5vw, 42px);
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: -0.025em;
+            line-height: 1.15;
+            margin-bottom: 14px;
+        }
+
+        .sample-left p {
+            font-size: 16px;
+            color: #273108;
+            line-height: 1.5;
+            margin-bottom: 28px;
+        }
+
+        .sample-btn-dark {
+            background: #111422 !important;
+            color: #ffffff !important;
+            border: none !important;
+            font-weight: 700 !important;
+            font-size: 15px !important;
+            padding: 14px 28px !important;
+            border-radius: 999px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            box-shadow: 0 4px 16px rgba(17, 20, 34, 0.2);
+        }
+
+        .sample-btn-dark:hover {
+            background: #23273e !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(17, 20, 34, 0.3);
+        }
+
+        .sample-right {
+            flex: 1 1 420px;
+            max-width: 520px;
+        }
+
+        .sample-card-preview {
+            background: #ffffff;
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .sample-pre {
+            font-family: "DM Mono", Menlo, Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #1f2937;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 210px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .sample-pre::-webkit-scrollbar {
+            width: 5px;
+        }
+        .sample-pre::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 999px;
+        }
+
+        /* ===================== INFO SECTION (WHAT, HOW, WHY) ===================== */
+        .about-section {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 80px 28px;
+        }
+
+        .about-header {
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 52px;
+        }
+
+        .about-tag {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .about-header h2 {
+            font-size: clamp(30px, 5vw, 44px);
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.025em;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+
+        .about-header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .about-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px 28px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .about-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.05);
+        }
+
+        .about-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .about-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .about-card:nth-child(1) .about-icon { background: #ede5f8; }
+        .about-card:nth-child(2) .about-icon { background: #e3f5eb; }
+        .about-card:nth-child(3) .about-icon { background: #fff2ed; }
+        .about-card:nth-child(4) .about-icon { background: #e7f3fb; }
+
+        .about-pill {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: var(--textarea-bg);
+            color: var(--text-secondary);
+        }
+
+        .about-card h3 {
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 10px;
+            letter-spacing: -0.015em;
+        }
+
+        .about-card p {
+            font-size: 14.5px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ===================== TOAST ===================== */
         .toast {
             position: fixed;
-            bottom: 24px;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
             opacity: 0;
-            background: #222842;
-            border: 1px solid #343c5e;
-            color: var(--text);
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 13.5px;
-            transition: all .25s;
+            background: var(--accent-dark);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
         }
 
         .toast.show {
             opacity: 1;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateY(0);
         }
 
         .empty {
             color: var(--muted);
             font-size: 14px;
-            padding: 6px 2px;
+            padding: 12px 4px;
         }
 
-        @media (max-width: 560px) {
-            .wrap {
-                padding-top: 26px;
-            }
+        /* ===================== FOOTER ===================== */
+        .footer {
+            text-align: center;
+            padding: 40px 28px;
+            color: var(--muted);
+            font-size: 13.5px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
 
-            .title {
-                font-size: 19px;
-            }
+        .footer a {
+            color: var(--accent-dark);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===================== RESPONSIVE ===================== */
+        @media (max-width: 860px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+            .about-grid { grid-template-columns: 1fr; }
+            .sample-wrapper { flex-direction: column; }
+            .sample-left, .sample-right { max-width: 100%; width: 100%; }
+        }
+
+        @media (max-width: 580px) {
+            .nav { padding: 14px 18px; }
+            .nav-links a { padding: 6px 14px; font-size: 12.5px; }
+            .hero { padding: 90px 20px 0; }
+            .hero-title { font-size: 34px; }
+            .input-panel { padding: 0 20px 36px; }
+            .input-card { padding: 18px; }
+            .placeholder-section { padding: 50px 20px; }
+            .results-section { padding: 20px 20px 40px; }
+            .sample-section { padding: 50px 20px; }
+            .card { padding: 24px 20px; }
+            .grid { grid-template-columns: 1fr; }
+            .about-section { padding: 50px 20px; }
         }
     </style>
 </head>
 
 <body>
-    <div class="wrap">
-        <header>
-            <h1>Text to <span>Cards</span></h1>
-            <p>Paste a poster, WhatsApp forward, email or posting. Get the dates, venue, money, eligibility and links in
-                one clean card.</p>
-        </header>
+    <!-- FIXED NAVBAR -->
+    <div class="nav-wrapper">
+        <nav class="nav" id="top">
+            <a href="#top" class="nav-logo" title="Arbiter Home">
+                <span class="logo-badge">A</span>
+                <span class="logo-name">Arbiter</span>
+                <span class="logo-dot"></span>
+            </a>
+            <div class="nav-links">
+                <a href="#try-sample">Try a sample</a>
+                <a href="#about">About</a>
+            </div>
+        </nav>
+    </div>
 
-        <section class="input-panel">
+    <!-- HERO -->
+    <section class="hero">
+        <h1 class="hero-title">
+            Messy text in.<br>
+            <span class="highlight">Clean card</span> out.
+        </h1>
+        <p class="hero-sub">
+            Paste a poster, WhatsApp forward, email or posting. Get the dates, venue, money, eligibility and links in one clean card.
+        </p>
+    </section>
+
+    <!-- INPUT PANEL -->
+    <section class="input-panel">
+        <div class="input-card">
             <textarea id="text" placeholder="Paste your text here..." spellcheck="false"></textarea>
             <div class="bar">
                 <button class="primary" id="go">Extract details</button>
-                <button id="sample">Try a sample</button>
                 <button id="clear">Clear</button>
                 <span class="count" id="count">0 characters</span>
             </div>
-        </section>
+        </div>
+    </section>
 
+    <!-- STATUS MESSAGES -->
+    <div class="status-container">
         <div class="status" id="status"></div>
-        <div id="results"></div>
     </div>
+
+    <!-- 1. "YOUR CARDS APPEAR HERE" PLACEHOLDER (NOW ABOVE, LIME & CREAMY) -->
+    <section class="placeholder-section" id="placeholder-section">
+        <div class="placeholder-wrapper">
+            <div class="placeholder-box">
+                <h3>Your card appears here</h3>
+                <p>Paste text above or try the sample.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESULTS CONTAINER (RENDERED CARDS APPEAR HERE ABOVE SAMPLE) -->
+    <section class="results-section" id="results-section" style="display: none;">
+        <div class="results-head">
+            <h2 id="results-count">1 ITEM FOUND</h2>
+            <button class="btn-copy-outline" id="copy-all-btn">Copy all JSON</button>
+        </div>
+        <div id="results"></div>
+    </section>
+
+    <!-- 2. "TRY A SAMPLE" SECTION (NOW BELOW) -->
+    <section class="sample-section" id="try-sample">
+        <div class="sample-wrapper">
+            <div class="sample-left">
+                <span class="sample-tag">NO TEXT HANDY?</span>
+                <h2>Try a sample</h2>
+                <p>See how a real hackathon WhatsApp forward turns into a structured card.</p>
+                <button class="sample-btn-dark" id="use-sample-btn">Use this sample &rarr;</button>
+            </div>
+            <div class="sample-right">
+                <div class="sample-card-preview">
+                    <pre class="sample-pre"><code>🏆 Prize pool: ₹2 Lakh+
+Open to students from IITs, NITs, IIITs & BITS
+
+New to AI or coding? Free, optional workshops included
+Build a real AI app for your resume & portfolio
+Certificates for all, prizes for winners
+
+Register your team: https://tinyurl.com/3rwxwvrt
+For any Queries Whatsapp : 9281411507
+
+Let's get building! 🚀</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. ABOUT SECTION (WHAT, HOW, WHY, HOW IT WORKS) -->
+    <section class="about-section" id="about">
+        <div class="about-header">
+            <span class="about-tag">OVERVIEW & GUIDE</span>
+            <h2>Clarity in Seconds</h2>
+            <p>Everything you need to know about how Arbiter transforms unstructured text into actionable information.</p>
+        </div>
+
+        <div class="about-grid">
+            <div class="about-card">
+                <div class="about-top">
+                    <div class="about-icon">📋</div>
+                    <span class="about-pill">EXTRACTION</span>
+                </div>
+                <h3>What it does</h3>
+                <p>Takes messy text from posters, WhatsApp forwards, brochures, email notices, or job listings and extracts all structured fields into clean, organized cards with verified dates, fees, venues, and registration links.</p>
+            </div>
+
+            <div class="about-card">
+                <div class="about-top">
+                    <div class="about-icon">🚀</div>
+                    <span class="about-pill">HOW TO USE</span>
+                </div>
+                <h3>How to use it</h3>
+                <p>Simply paste any announcement into the box above and hit "Extract details". You can also test with the one-click sample forward. Copy the cleanly extracted card text or JSON with a single tap.</p>
+            </div>
+
+            <div class="about-card">
+                <div class="about-top">
+                    <div class="about-icon">💡</div>
+                    <span class="about-pill">WHY IT MATTERS</span>
+                </div>
+                <h3>Why it is important</h3>
+                <p>College groups and team inboxes are flooded with walls of chaotic forwards. Arbiter ensures you never miss a critical submission deadline, buried Google Form link, or key eligibility requirement.</p>
+            </div>
+
+            <div class="about-card">
+                <div class="about-top">
+                    <div class="about-icon">⚙️</div>
+                    <span class="about-pill">ARCHITECTURE</span>
+                </div>
+                <h3>How it works</h3>
+                <p>Powered by Google's Gemini AI models with strict structured JSON schema extraction. Dates are normalized relative to current time, links are validated, and urgency indicators are automatically generated.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        Arbiter · Powered by Gemini AI · <a href="https://github.com/rizzesh/Arbiter" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </footer>
+
     <div class="toast" id="toast"></div>
 
     <script>
-        const SAMPLE = `Entrepreneurship Workshop | Techfest, IIT Bombay
-Interested in exploring how an idea can be developed into a startup?
-Join us on 16th December 2026 at IIT Bombay for a session covering the startup journey - from identifying a problem and validating an idea to building an MVP, scaling, and pitching.
-\u{1F4CD} IIT Bombay
-\u{1F4C5} 16th December 2026
-IDEA \u2192 VALIDATE \u2192 BUILD \u2192 SCALE \u2192 PITCH
-Register: techfest.org/workshops/entrepreneurship
-Techfest, IIT Bombay
-Asia\u2019s Largest Science & Technology Festival`;
+        const SAMPLE = `🚀 FORGE '26 Gen AI Buildathon by NxtWave Launchpad!
+A 48-hour Gen AI buildathon for students to build AI apps, taking place from October 30th to November 1st.
+
+🗓 Starts: 30 Oct 2026 (Fri) 12:00 AM
+🗓 Ends: 1 Nov 2026 (Sun) 12:00 AM
+
+🏆 Prize pool: ₹2 Lakh+
+🎓 Open to students from IITs, NITs, IIITs & BITS
+
+New to AI or coding? Free, optional workshops included
+Build a real AI app for your resume & portfolio
+Certificates for all, prizes for winners, free workshops
+
+🔗 Register your team: https://tinyurl.com/3rwxwvrt
+📞 For any Queries Whatsapp : 9281411507
+
+Let's get building! 🚀`;
 
         const TYPE_META = {
-            event: { label: "Event", color: "#7c8cff" },
-            internship: { label: "Internship", color: "#5eead4" },
-            hackathon: { label: "Hackathon", color: "#f9a8d4" },
-            job: { label: "Job", color: "#fbbf77" },
-            email_notice: { label: "Notice", color: "#7dd3fc" },
-            other: { label: "Info", color: "#a3aac2" },
+            event:        { label: "EVENT",        color: "#261338" },
+            internship:   { label: "INTERNSHIP",   color: "#261338" },
+            hackathon:    { label: "HACKATHON",    color: "#261338" },
+            job:          { label: "JOB",          color: "#261338" },
+            email_notice: { label: "NOTICE",       color: "#261338" },
+            other:        { label: "INFO",         color: "#261338" },
         };
 
         const $ = (id) => document.getElementById(id);
-        const textEl = $("text"), goBtn = $("go"), statusEl = $("status"), resultsEl = $("results");
+        const textEl = $("text");
+        const goBtn = $("go");
+        const statusEl = $("status");
+        const resultsEl = $("results");
+        const resultsSection = $("results-section");
+        const placeholderSection = $("placeholder-section");
+        const resultsCountEl = $("results-count");
+        const copyAllBtn = $("copy-all-btn");
+
         let lastData = null;
 
-        // ---------- tiny DOM helper (uses textContent, so no HTML injection) ----------
+        // ---------- DOM HELPER ----------
         function h(tag, attrs, ...kids) {
             const el = document.createElement(tag);
             for (const [k, v] of Object.entries(attrs || {})) {
@@ -587,164 +1201,249 @@ Asia\u2019s Largest Science & Technology Festival`;
         }
 
         function toast(msg) {
-            const t = $("toast"); t.textContent = msg; t.classList.add("show");
-            clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1600);
-        }
-        async function copy(str, msg) {
-            try { await navigator.clipboard.writeText(str); toast(msg); }
-            catch { toast("Copy failed. Select and copy manually."); }
+            const t = $("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            clearTimeout(toast._t);
+            toast._t = setTimeout(() => t.classList.remove("show"), 1800);
         }
 
-        // ---------- evidence lookup ----------
+        async function copy(str, msg) {
+            try {
+                await navigator.clipboard.writeText(str);
+                toast(msg);
+            } catch {
+                toast("Copy failed. Select and copy manually.");
+            }
+        }
+
+        // ---------- EVIDENCE TOOLTIPS ----------
         function evidenceFor(item, field) {
             return (item.evidence || []).filter(e => e.field.toLowerCase().startsWith(field)).map(e => e.quote);
         }
+
         function withEv(item, field, node) {
             const ev = evidenceFor(item, field);
             if (!ev.length) return node;
-            const span = h("span", { class: "ev", title: "From the text: \u201C" + ev.join("\u201D, \u201C") + "\u201D" });
+            const span = h("span", { class: "ev", title: "From text: \u201C" + ev.join("\u201D, \u201C") + "\u201D" });
             span.append(node);
             return span;
         }
 
-        // ---------- sections ----------
+        // ---------- SUB-SECTIONS (LAVENDER BOXES) ----------
         function section(icon, title, body, wide) {
-            return h("div", { class: "sec" + (wide ? " wide" : "") }, h("h3", {}, h("span", { class: "ic", text: icon }), title), body);
+            return h("div", { class: "sec" + (wide ? " wide" : "") },
+                h("h3", {}, h("span", { class: "ic", text: icon }), title),
+                body
+            );
         }
 
         function renderWhen(item) {
-            if (!item.dates.length) return null;
+            if (!item.dates || !item.dates.length) return null;
             const rows = item.dates.map(d => h("div", { class: "row" },
                 h("span", { class: "k", text: d.label }),
                 h("span", { class: "v" },
                     withEv(item, "date", document.createTextNode(d.readable || d.date || "Date unclear")),
-                    d.time_readable ? h("small", { text: d.time_readable }) : null)));
-            return section("\u{1F4C5}", "When", h("div", {}, rows));
+                    d.time_readable ? h("small", { text: d.time_readable }) : null
+                )
+            ));
+            return section("\u{1F4C5}", "WHEN", h("div", {}, rows));
         }
 
         function renderWhere(item) {
             if (!item.venue && !item.mode) return null;
             const rows = [];
-            if (item.venue) rows.push(h("div", { class: "row" }, h("span", { class: "k", text: "Venue" }),
-                h("span", { class: "v" }, withEv(item, "venue", document.createTextNode(item.venue)))));
-            if (item.mode) rows.push(h("div", { class: "row" }, h("span", { class: "k", text: "Mode" }), h("span", { class: "v", text: item.mode })));
-            return section("\u{1F4CD}", "Where", h("div", {}, rows));
+            if (item.venue) {
+                rows.push(h("div", { class: "row" },
+                    h("span", { class: "k", text: "Venue" }),
+                    h("span", { class: "v" }, withEv(item, "venue", document.createTextNode(item.venue)))
+                ));
+            }
+            if (item.mode) {
+                rows.push(h("div", { class: "row" },
+                    h("span", { class: "k", text: "Mode" }),
+                    h("span", { class: "v", text: item.mode })
+                ));
+            }
+            return section("\u{1F4CD}", "WHERE", h("div", {}, rows));
         }
 
         function renderMoney(item) {
-            if (!item.money.length) return null;
+            if (!item.money || !item.money.length) return null;
             const rows = item.money.map(m => h("div", { class: "row" },
                 h("span", { class: "k", text: m.role }),
-                h("span", { class: "v" }, withEv(item, "money", document.createTextNode(m.amount)),
-                    m.currency ? h("small", { text: m.currency }) : null)));
-            return section("\u{1F4B0}", "Money", h("div", {}, rows));
+                h("span", { class: "v" },
+                    withEv(item, "money", document.createTextNode(m.amount)),
+                    m.currency ? h("small", { text: m.currency }) : null
+                )
+            ));
+            return section("\u{1F4B0}", "MONEY", h("div", {}, rows));
         }
 
         function renderList(item, icon, title, key) {
-            if (!item[key].length) return null;
-            return section(icon, title, h("ul", { class: "plain" }, item[key].map(t => h("li", {}, withEv(item, key, document.createTextNode(t))))));
+            if (!item[key] || !item[key].length) return null;
+            return section(icon, title, h("ul", { class: "plain" },
+                item[key].map(t => h("li", {}, withEv(item, key, document.createTextNode(t))))
+            ));
         }
 
         function renderDetails(item) {
-            if (!item.details.length) return null;
-            return section("\u2728", "Details", h("div", {}, item.details.map(d => h("div", { class: "row" },
-                h("span", { class: "k", text: d.label }), h("span", { class: "v", text: d.value })))));
+            if (!item.details || !item.details.length) return null;
+            return section("\u2728", "DETAILS", h("div", {},
+                item.details.map(d => h("div", { class: "row" },
+                    h("span", { class: "k", text: d.label }),
+                    h("span", { class: "v", text: d.value })
+                ))
+            ));
         }
 
-        function safeHref(url) { return /^https?:\/\//i.test(url) ? url : null; }
+        function safeHref(url) {
+            return /^https?:\/\//i.test(url) ? url : null;
+        }
 
         function renderLinks(item) {
-            if (!item.links.length) return null;
-            const links = item.links.map(l => h("a", { class: "link", href: safeHref(l.url), target: "_blank", rel: "noopener noreferrer" },
-                h("div", { class: "l1" }, l.label || l.domain, h("span", { text: "\u2197" })),
-                h("div", { class: "l2", text: "Leads to: " + l.directs_to }),
-                h("div", { class: "l3", text: l.url })));
-            return section("\u{1F517}", "Links", h("div", {}, links), true);
+            if (!item.links || !item.links.length) return null;
+            const links = item.links.map(l => {
+                const title = (l.label || l.domain || "Registration link") + " \u2197";
+                const subParts = [];
+                if (l.directs_to) subParts.push(l.directs_to);
+                if (l.url) subParts.push(l.url);
+                const subText = subParts.join(" \u00B7 ");
+
+                return h("a", { class: "link", href: safeHref(l.url), target: "_blank", rel: "noopener noreferrer" },
+                    h("div", { class: "l1", text: title }),
+                    subText ? h("div", { class: "l2", text: subText }) : null
+                );
+            });
+            return section("\u{1F517}", "LINKS", h("div", {}, links), true);
         }
 
         function renderContacts(item) {
-            if (!item.contacts.length) return null;
-            return section("\u{1F4DE}", "Contact", h("div", {}, item.contacts.map(c => h("div", { class: "row" },
-                h("span", { class: "k", text: c.kind }), h("span", { class: "v", text: c.value })))));
+            if (!item.contacts || !item.contacts.length) return null;
+            return section("\u{1F4DE}", "CONTACT", h("div", {},
+                item.contacts.map(c => h("div", { class: "row" },
+                    h("span", { class: "k", text: c.kind }),
+                    h("span", { class: "v", text: c.value })
+                ))
+            ));
         }
 
         function renderActions(item) {
-            if (!item.actions.length) return null;
-            return section("\u2705", "To do", h("div", {}, item.actions.map(a =>
-                h("label", { class: "todo" }, h("input", { type: "checkbox" }), h("span", { text: a })))));
+            if (!item.actions || !item.actions.length) return null;
+            return section("\u2705", "TO DO", h("div", {},
+                item.actions.map(a => h("label", { class: "todo" },
+                    h("input", { type: "checkbox" }),
+                    h("span", { text: a })
+                ))
+            ));
         }
 
         function renderSources(item) {
-            if (!item.evidence.length) return null;
-            return h("details", {}, h("summary", { text: "Source snippets (" + item.evidence.length + ")" }),
-                h("div", { class: "src" }, item.evidence.map(e => h("div", {}, h("b", { text: e.field + ": " }), "\u201C" + e.quote + "\u201D"))));
+            if (!item.evidence || !item.evidence.length) return null;
+            return h("details", {},
+                h("summary", { text: "Source snippets (" + item.evidence.length + ")" }),
+                h("div", { class: "src" },
+                    item.evidence.map(e => h("div", {},
+                        h("b", { text: e.field + ": " }),
+                        "\u201C" + e.quote + "\u201D"
+                    ))
+                )
+            );
         }
 
-        // ---------- plain text for copy ----------
+        // ---------- PLAIN TEXT BUILDER FOR COPY ----------
         function toText(item) {
             const L = [];
             L.push(`${item.title}${item.organizer ? " | " + item.organizer : ""} (${(TYPE_META[item.type] || TYPE_META.other).label})`);
-            L.push(item.tldr);
+            if (item.tldr) L.push(item.tldr);
             if (item.urgency) L.push(`Status: ${item.urgency.text}`);
-            item.dates.forEach(d => L.push(`${d.label}: ${d.readable || d.date || "unclear"}${d.time_readable ? ", " + d.time_readable : ""}`));
+            (item.dates || []).forEach(d => L.push(`${d.label}: ${d.readable || d.date || "unclear"}${d.time_readable ? ", " + d.time_readable : ""}`));
             if (item.venue) L.push(`Venue: ${item.venue}`);
             if (item.mode) L.push(`Mode: ${item.mode}`);
-            item.money.forEach(m => L.push(`${m.role}: ${m.amount}`));
-            if (item.eligibility.length) L.push("Eligibility: " + item.eligibility.join("; "));
-            if (item.requirements.length) L.push("Requirements: " + item.requirements.join("; "));
-            item.details.forEach(d => L.push(`${d.label}: ${d.value}`));
-            item.links.forEach(l => L.push(`${l.label}: ${l.url} (${l.directs_to})`));
-            item.contacts.forEach(c => L.push(`${c.kind}: ${c.value}`));
-            if (item.actions.length) L.push("To do: " + item.actions.join("; "));
+            (item.money || []).forEach(m => L.push(`${m.role}: ${m.amount}${m.currency ? " " + m.currency : ""}`));
+            if (item.eligibility && item.eligibility.length) L.push("Eligibility: " + item.eligibility.join("; "));
+            if (item.requirements && item.requirements.length) L.push("Requirements: " + item.requirements.join("; "));
+            (item.details || []).forEach(d => L.push(`${d.label}: ${d.value}`));
+            (item.links || []).forEach(l => L.push(`${l.label || "Link"}: ${l.url}`));
+            (item.contacts || []).forEach(c => L.push(`${c.kind}: ${c.value}`));
+            if (item.actions && item.actions.length) L.push("To do: " + item.actions.join("; "));
             return L.join("\n");
         }
 
-        // ---------- card ----------
+        // ---------- CARD COMPONENT (CARDS.PNG) ----------
         function renderCard(item) {
             const meta = TYPE_META[item.type] || TYPE_META.other;
             const parts = [
-                renderWhen(item), renderWhere(item), renderMoney(item),
-                renderList(item, "\u{1F393}", "Eligibility", "eligibility"),
-                renderList(item, "\u{1F4CB}", "Requirements", "requirements"),
-                renderDetails(item), renderContacts(item), renderActions(item), renderLinks(item),
+                renderWhen(item),
+                renderWhere(item),
+                renderMoney(item),
+                renderList(item, "\u{1F393}", "ELIGIBILITY", "eligibility"),
+                renderList(item, "\u{1F4CB}", "REQUIREMENTS", "requirements"),
+                renderDetails(item),
+                renderContacts(item),
+                renderActions(item),
+                renderLinks(item),
             ].filter(Boolean);
 
-            return h("article", { class: "card", style: `--tc:${meta.color}` },
+            return h("article", { class: "card" },
                 h("div", { class: "card-top" },
                     h("span", { class: "badge", text: meta.label }),
-                    item.urgency ? h("span", { class: "urg " + item.urgency.level, text: item.urgency.text }) : null,
-                    h("span", { class: "spacer" })),
-                h("div", { class: "title", text: item.title }),
+                    item.urgency ? h("span", { class: "urg " + (item.urgency.level || "low"), text: item.urgency.text }) : null,
+                    h("span", { class: "spacer" })
+                ),
+                h("h2", { class: "title", text: item.title }),
                 item.organizer ? h("div", { class: "org", text: item.organizer }) : null,
-                h("p", { class: "tldr", text: item.tldr }),
-                parts.length ? h("div", { class: "grid" }, parts) : h("div", { class: "empty", text: "No further details found in the text." }),
+                item.tldr ? h("p", { class: "tldr", text: item.tldr }) : null,
+                parts.length ? h("div", { class: "grid" }, parts) : h("div", { class: "empty", text: "No structured details found in text." }),
                 renderSources(item),
                 h("div", { class: "card-foot" },
-                    h("button", { class: "small", onclick: () => copy(toText(item), "Copied as text") }, "Copy text"),
-                    h("button", { class: "small", onclick: () => copy(JSON.stringify(item, null, 2), "Copied JSON") }, "Copy JSON")));
+                    h("button", { class: "btn-copy-dark", onclick: () => copy(toText(item), "Copied card text!") }, "Copy text"),
+                    h("button", { class: "btn-copy-outline", onclick: () => copy(JSON.stringify(item, null, 2), "Copied JSON!") }, "Copy JSON")
+                )
+            );
         }
 
         function render(data) {
             resultsEl.replaceChildren();
-            if (!data.items.length) { statusEl.replaceChildren(h("div", { class: "empty", text: "Nothing to extract from that text." })); return; }
-            resultsEl.append(
-                h("div", { class: "results-head" },
-                    h("h2", { text: data.items.length === 1 ? "1 ITEM FOUND" : data.items.length + " ITEMS FOUND" }),
-                    h("button", { class: "small", onclick: () => copy(JSON.stringify(data.items, null, 2), "Copied all JSON") }, "Copy all JSON")),
-                ...data.items.map(renderCard));
+            if (!data.items || !data.items.length) {
+                statusEl.replaceChildren(h("div", { class: "empty", text: "Nothing to extract from that text." }));
+                placeholderSection.style.display = "block";
+                resultsSection.style.display = "none";
+                return;
+            }
+
+            placeholderSection.style.display = "none";
+            resultsSection.style.display = "block";
+            resultsCountEl.textContent = data.items.length === 1 ? "1 ITEM FOUND" : data.items.length + " ITEMS FOUND";
+
+            copyAllBtn.onclick = () => copy(JSON.stringify(data.items, null, 2), "Copied all items as JSON!");
+            resultsEl.append(...data.items.map(renderCard));
+            
+            // Smoothly scroll to results
+            resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
         }
 
-        // ---------- actions ----------
+        // ---------- EXTRACTION LOGIC ----------
         async function extract() {
             const text = textEl.value.trim();
-            if (!text) { statusEl.replaceChildren(h("div", { class: "error", text: "Please paste some text first." })); return; }
+            if (!text) {
+                statusEl.replaceChildren(h("div", { class: "error", text: "Please paste some text first." }));
+                return;
+            }
+
             goBtn.disabled = true;
-            resultsEl.replaceChildren();
-            statusEl.replaceChildren(h("div", { class: "loading" }, h("div", { class: "spinner" }), "Reading your text..."));
+            statusEl.replaceChildren(h("div", { class: "loading" }, h("div", { class: "spinner" }), "Reading your text and extracting details..."));
+
             try {
-                const res = await fetch("/api/extract", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+                const res = await fetch("/api/extract", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text })
+                });
+
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.detail || "Something went wrong.");
+
                 lastData = data;
                 statusEl.replaceChildren();
                 render(data);
@@ -755,11 +1454,34 @@ Asia\u2019s Largest Science & Technology Festival`;
             }
         }
 
+        // ---------- EVENT LISTENERS ----------
         goBtn.addEventListener("click", extract);
-        $("sample").addEventListener("click", () => { textEl.value = SAMPLE; updateCount(); extract(); });
-        $("clear").addEventListener("click", () => { textEl.value = ""; updateCount(); statusEl.replaceChildren(); resultsEl.replaceChildren(); textEl.focus(); });
-        textEl.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") extract(); });
-        function updateCount() { $("count").textContent = textEl.value.length.toLocaleString() + " characters"; }
+
+        $("use-sample-btn").addEventListener("click", () => {
+            textEl.value = SAMPLE;
+            updateCount();
+            textEl.scrollIntoView({ behavior: "smooth", block: "center" });
+            extract();
+        });
+
+        $("clear").addEventListener("click", () => {
+            textEl.value = "";
+            updateCount();
+            statusEl.replaceChildren();
+            resultsEl.replaceChildren();
+            resultsSection.style.display = "none";
+            placeholderSection.style.display = "block";
+            textEl.focus();
+        });
+
+        textEl.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") extract();
+        });
+
+        function updateCount() {
+            $("count").textContent = textEl.value.length.toLocaleString() + " characters";
+        }
+
         textEl.addEventListener("input", updateCount);
     </script>
 </body>
