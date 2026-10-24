@@ -1,3 +1,4 @@
+
 # Text to Cards
 
 Paste a poster, WhatsApp forward, email or posting and get an organized card with dates, venue, money, eligibility, links and next actions. Uses the Gemini API with structured JSON output. No model training.
