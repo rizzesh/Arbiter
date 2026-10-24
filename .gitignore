@@ -1,0 +1,19 @@
+.env
+# Secrets
+.env
+
+# Virtual environment (use your venv folder's name: venv, .venv, env)
+venv/
+.venv/
+env/
+
+# Python junk
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
