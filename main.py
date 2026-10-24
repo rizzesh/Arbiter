@@ -8,6 +8,7 @@ Then open http://localhost:8000
 """
 
 import os
+import time
 import re
 from datetime import date, datetime
 from enum import Enum
@@ -150,8 +151,27 @@ def get_client() -> genai.Client:
         key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
         if not key:
             raise HTTPException(500, "GEMINI_API_KEY is not set on the server.")
-        _client = genai.Client(api_key=key)
+        _client = genai.Client(api_key=key, http_options=types.HttpOptions(timeout=30000))
     return _client
+
+
+FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-3.1-flash-lite")
+
+
+def make_config(model: str) -> types.GenerateContentConfig:
+    if model.startswith("gemini-2.5"):
+        thinking = types.ThinkingConfig(thinking_budget=0)
+    elif "flash-lite" in model:
+        thinking = types.ThinkingConfig(thinking_level="minimal")
+    else:
+        thinking = types.ThinkingConfig(thinking_level="low")  # gemini-3.8-flash rejects "minimal"
+    return types.GenerateContentConfig(
+        system_instruction=SYSTEM_PROMPT,
+        response_mime_type="application/json",
+        response_schema=Extraction,
+        temperature=0,
+        thinking_config=thinking,
+    )
 
 
 def call_gemini(text: str, today: date) -> Extraction:
@@ -159,17 +179,26 @@ def call_gemini(text: str, today: date) -> Extraction:
         f"TODAY'S DATE: {today:%A, %d %B %Y} (timezone IST, Asia/Kolkata)\n\n"
         f"TEXT TO ANALYZE:\n<<<\n{text}\n>>>"
     )
-    resp = get_client().models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            response_mime_type="application/json",
-            response_schema=Extraction,
-            temperature=0,
-        ),
-    )
-    return Extraction.model_validate_json(resp.text)
+    last_exc = None
+    for model in dict.fromkeys([MODEL_NAME, FALLBACK_MODEL]):  # primary, then backup
+        for attempt in range(2):
+            try:
+                t0 = time.time()
+                resp = get_client().models.generate_content(
+                    model=model, contents=prompt, config=make_config(model)
+                )
+                print(f"[{model}] took {time.time() - t0:.1f}s", flush=True)
+                return Extraction.model_validate_json(resp.text)
+            except Exception as exc:
+                last_exc = exc
+                msg = str(exc)
+                print(f"[{model}] attempt {attempt + 1} failed: {msg[:150]}", flush=True)
+                transient = any(k in msg for k in ("503", "UNAVAILABLE", "429", "overloaded"))
+                if transient and attempt == 0:
+                    time.sleep(1.5)
+                    continue
+                break  # give up on this model, try the next one
+    raise last_exc
 
 
 # --------------------------------------------------------------------------- #

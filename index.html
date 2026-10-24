@@ -1,183 +1,552 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Text to Cards</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0d0f15;
-    --bg-glow: #151a2b;
-    --panel: #141722;
-    --card: #171b28;
-    --card-2: #1c2132;
-    --border: #262c40;
-    --text: #e8eaf2;
-    --muted: #8d95ad;
-    --accent: #7c8cff;
-    --accent-2: #5eead4;
-    --danger: #ff7b8a;
-    --radius: 16px;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; }
-  body {
-    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(1000px 500px at 50% -10%, var(--bg-glow), var(--bg));
-    background-color: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrap { max-width: 940px; margin: 0 auto; padding: 40px 20px 80px; }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Text to Cards</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0f15;
+            --bg-glow: #151a2b;
+            --panel: #141722;
+            --card: #171b28;
+            --card-2: #1c2132;
+            --border: #262c40;
+            --text: #e8eaf2;
+            --muted: #8d95ad;
+            --accent: #7c8cff;
+            --accent-2: #5eead4;
+            --danger: #ff7b8a;
+            --radius: 16px;
+        }
 
-  header h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.02em; }
-  header h1 span { color: var(--accent); }
-  header p { margin: 0; color: var(--muted); max-width: 640px; }
+        * {
+            box-sizing: border-box;
+        }
 
-  .input-panel {
-    margin-top: 26px; background: var(--panel); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
-  }
-  textarea {
-    width: 100%; min-height: 170px; resize: vertical; background: #0f121b; color: var(--text);
-    border: 1px solid var(--border); border-radius: 12px; padding: 14px; font: inherit; font-size: 14.5px;
-    outline: none; transition: border-color .15s, box-shadow .15s;
-  }
-  textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,140,255,.15); }
-  textarea::placeholder { color: #566079; }
-  .bar { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
-  .bar .count { margin-left: auto; color: var(--muted); font-size: 12.5px; }
+        html,
+        body {
+            margin: 0;
+        }
 
-  button {
-    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 10px;
-    padding: 10px 16px; border: 1px solid var(--border); background: var(--card-2); color: var(--text);
-    transition: transform .06s, background .15s, border-color .15s, opacity .15s;
-  }
-  button:hover { border-color: #3a4263; background: #222842; }
-  button:active { transform: translateY(1px); }
-  button.primary { background: linear-gradient(135deg, #7c8cff, #6272f0); border-color: transparent; color: #0b0d14; }
-  button.primary:hover { background: linear-gradient(135deg, #8d9bff, #7081f5); }
-  button:disabled { opacity: .55; cursor: not-allowed; }
-  button.small { padding: 6px 11px; font-size: 12.5px; font-weight: 500; }
+        body {
+            font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: radial-gradient(1000px 500px at 50% -10%, var(--bg-glow), var(--bg));
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
 
-  .status { margin-top: 22px; }
-  .error {
-    background: rgba(255,123,138,.08); border: 1px solid rgba(255,123,138,.35); color: #ffc2c9;
-    padding: 12px 14px; border-radius: 12px; font-size: 14px;
-  }
-  .loading { display: flex; align-items: center; gap: 12px; color: var(--muted); padding: 10px 2px; }
-  .spinner {
-    width: 18px; height: 18px; border-radius: 50%; border: 2px solid #2c3350; border-top-color: var(--accent);
-    animation: spin .8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+        .wrap {
+            max-width: 940px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
 
-  .results-head { display: flex; align-items: center; justify-content: space-between; margin: 28px 0 12px; }
-  .results-head h2 { font-size: 15px; margin: 0; color: var(--muted); font-weight: 600; letter-spacing: .02em; }
+        header h1 {
+            font-size: 28px;
+            margin: 0 0 6px;
+            letter-spacing: -0.02em;
+        }
 
-  .card {
-    background: linear-gradient(180deg, var(--card), #151926); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 22px; margin-bottom: 18px; position: relative;
-    box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: rise .35s ease both;
-  }
-  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-  .card::before {
-    content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 3px; border-radius: 3px;
-    background: var(--tc, var(--accent));
-  }
-  .card-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .spacer { flex: 1; }
+        header h1 span {
+            color: var(--accent);
+        }
 
-  .badge {
-    font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-    padding: 4px 10px; border-radius: 999px; border: 1px solid transparent;
-    color: var(--tc, var(--accent)); background: color-mix(in srgb, var(--tc, var(--accent)) 14%, transparent);
-    border-color: color-mix(in srgb, var(--tc, var(--accent)) 35%, transparent);
-  }
-  .urg { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
-  .urg.high { color: #ffb4bd; background: rgba(255,123,138,.12); border: 1px solid rgba(255,123,138,.35); }
-  .urg.medium { color: #ffd592; background: rgba(255,189,89,.1); border: 1px solid rgba(255,189,89,.3); }
-  .urg.low { color: #9de9c8; background: rgba(94,234,160,.08); border: 1px solid rgba(94,234,160,.25); }
-  .urg.past { color: var(--muted); background: rgba(141,149,173,.1); border: 1px solid var(--border); }
+        header p {
+            margin: 0;
+            color: var(--muted);
+            max-width: 640px;
+        }
 
-  .title { font-size: 21px; font-weight: 700; margin: 14px 0 2px; letter-spacing: -0.01em; }
-  .org { color: var(--muted); font-size: 14px; }
-  .tldr { margin: 12px 0 0; font-size: 15px; color: #cfd3e3; }
+        .input-panel {
+            margin-top: 26px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 18px; }
-  .sec { background: var(--card-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 15px; }
-  .sec.wide { grid-column: 1 / -1; }
-  .sec h3 {
-    margin: 0 0 9px; font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted);
-    font-weight: 700; display: flex; align-items: center; gap: 7px;
-  }
-  .sec h3 .ic { font-size: 13px; filter: saturate(.8); }
-  .row { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 14px; }
-  .row + .row { border-top: 1px dashed #2a3047; }
-  .row .k { color: var(--muted); flex-shrink: 0; }
-  .row .v { text-align: right; font-weight: 500; }
-  .row .v small { display: block; color: var(--muted); font-weight: 400; font-size: 12px; }
-  ul.plain { margin: 0; padding-left: 18px; font-size: 14px; }
-  ul.plain li { margin: 3px 0; }
-  .ev { cursor: help; border-bottom: 1px dotted #55608a; }
+        textarea {
+            width: 100%;
+            min-height: 170px;
+            resize: vertical;
+            background: #0f121b;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            font: inherit;
+            font-size: 14.5px;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
 
-  .link { display: block; padding: 8px 0; text-decoration: none; color: inherit; }
-  .link + .link { border-top: 1px dashed #2a3047; }
-  .link .l1 { font-size: 14px; font-weight: 600; color: var(--accent); display: flex; gap: 6px; align-items: center; word-break: break-all; }
-  .link:hover .l1 { text-decoration: underline; }
-  .link .l2 { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-  .link .l3 { font-size: 12px; color: #6a7392; margin-top: 1px; word-break: break-all; }
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 140, 255, .15);
+        }
 
-  .todo { display: flex; gap: 10px; align-items: flex-start; padding: 5px 0; font-size: 14px; }
-  .todo input { margin-top: 4px; accent-color: var(--accent-2); width: 16px; height: 16px; }
-  .todo input:checked + span { color: var(--muted); text-decoration: line-through; }
+        textarea::placeholder {
+            color: #566079;
+        }
 
-  details { margin-top: 14px; }
-  summary { cursor: pointer; color: var(--muted); font-size: 13px; }
-  summary:hover { color: var(--text); }
-  .src { margin-top: 8px; font-size: 13px; color: var(--muted); }
-  .src div { padding: 4px 0; }
-  .src b { color: #b7bdd6; text-transform: capitalize; }
+        .bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
 
-  .card-foot { display: flex; gap: 8px; margin-top: 16px; }
-  .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0;
-    background: #222842; border: 1px solid #343c5e; color: var(--text); padding: 10px 16px; border-radius: 10px;
-    font-size: 13.5px; transition: all .25s; pointer-events: none;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%); }
-  .empty { color: var(--muted); font-size: 14px; padding: 6px 2px; }
-  @media (max-width: 560px) { .wrap { padding-top: 26px; } .title { font-size: 19px; } }
-</style>
+        .bar .count {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 12.5px;
+        }
+
+        button {
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            background: var(--card-2);
+            color: var(--text);
+            transition: transform .06s, background .15s, border-color .15s, opacity .15s;
+        }
+
+        button:hover {
+            border-color: #3a4263;
+            background: #222842;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #7c8cff, #6272f0);
+            border-color: transparent;
+            color: #0b0d14;
+        }
+
+        button.primary:hover {
+            background: linear-gradient(135deg, #8d9bff, #7081f5);
+        }
+
+        button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        button.small {
+            padding: 6px 11px;
+            font-size: 12.5px;
+            font-weight: 500;
+        }
+
+        .status {
+            margin-top: 22px;
+        }
+
+        .error {
+            background: rgba(255, 123, 138, .08);
+            border: 1px solid rgba(255, 123, 138, .35);
+            color: #ffc2c9;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--muted);
+            padding: 10px 2px;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #2c3350;
+            border-top-color: var(--accent);
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .results-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 28px 0 12px;
+        }
+
+        .results-head h2 {
+            font-size: 15px;
+            margin: 0;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: .02em;
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--card), #151926);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            margin-bottom: 18px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+            animation: rise .35s ease both;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 18px;
+            bottom: 18px;
+            width: 3px;
+            border-radius: 3px;
+            background: var(--tc, var(--accent));
+        }
+
+        .card-top {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        .badge {
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            color: var(--tc, var(--accent));
+            background: color-mix(in srgb, var(--tc, var(--accent)) 14%, transparent);
+            border-color: color-mix(in srgb, var(--tc, var(--accent)) 35%, transparent);
+        }
+
+        .urg {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        .urg.high {
+            color: #ffb4bd;
+            background: rgba(255, 123, 138, .12);
+            border: 1px solid rgba(255, 123, 138, .35);
+        }
+
+        .urg.medium {
+            color: #ffd592;
+            background: rgba(255, 189, 89, .1);
+            border: 1px solid rgba(255, 189, 89, .3);
+        }
+
+        .urg.low {
+            color: #9de9c8;
+            background: rgba(94, 234, 160, .08);
+            border: 1px solid rgba(94, 234, 160, .25);
+        }
+
+        .urg.past {
+            color: var(--muted);
+            background: rgba(141, 149, 173, .1);
+            border: 1px solid var(--border);
+        }
+
+        .title {
+            font-size: 21px;
+            font-weight: 700;
+            margin: 14px 0 2px;
+            letter-spacing: -0.01em;
+        }
+
+        .org {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .tldr {
+            margin: 12px 0 0;
+            font-size: 15px;
+            color: #cfd3e3;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .sec {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 15px;
+        }
+
+        .sec.wide {
+            grid-column: 1 / -1;
+        }
+
+        .sec h3 {
+            margin: 0 0 9px;
+            font-size: 11.5px;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .sec h3 .ic {
+            font-size: 13px;
+            filter: saturate(.8);
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .row+.row {
+            border-top: 1px dashed #2a3047;
+        }
+
+        .row .k {
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .row .v {
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .row .v small {
+            display: block;
+            color: var(--muted);
+            font-weight: 400;
+            font-size: 12px;
+        }
+
+        ul.plain {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 14px;
+        }
+
+        ul.plain li {
+            margin: 3px 0;
+        }
+
+        .ev {
+            cursor: help;
+            border-bottom: 1px dotted #55608a;
+        }
+
+        .link {
+            display: block;
+            padding: 8px 0;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .link+.link {
+            border-top: 1px dashed #2a3047;
+        }
+
+        .link .l1 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .link:hover .l1 {
+            text-decoration: underline;
+        }
+
+        .link .l2 {
+            font-size: 12.5px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .link .l3 {
+            font-size: 12px;
+            color: #6a7392;
+            margin-top: 1px;
+            word-break: break-all;
+        }
+
+        .todo {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .todo input {
+            margin-top: 4px;
+            accent-color: var(--accent-2);
+            width: 16px;
+            height: 16px;
+        }
+
+        .todo input:checked+span {
+            color: var(--muted);
+            text-decoration: line-through;
+        }
+
+        details {
+            margin-top: 14px;
+        }
+
+        summary {
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        summary:hover {
+            color: var(--text);
+        }
+
+        .src {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .src div {
+            padding: 4px 0;
+        }
+
+        .src b {
+            color: #b7bdd6;
+            text-transform: capitalize;
+        }
+
+        .card-foot {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0;
+            background: #222842;
+            border: 1px solid #343c5e;
+            color: var(--text);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            transition: all .25s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%);
+        }
+
+        .empty {
+            color: var(--muted);
+            font-size: 14px;
+            padding: 6px 2px;
+        }
+
+        @media (max-width: 560px) {
+            .wrap {
+                padding-top: 26px;
+            }
+
+            .title {
+                font-size: 19px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<div class="wrap">
-  <header>
-    <h1>Text to <span>Cards</span></h1>
-    <p>Paste a poster, WhatsApp forward, email or posting. Get the dates, venue, money, eligibility and links in one clean card.</p>
-  </header>
+    <div class="wrap">
+        <header>
+            <h1>Text to <span>Cards</span></h1>
+            <p>Paste a poster, WhatsApp forward, email or posting. Get the dates, venue, money, eligibility and links in
+                one clean card.</p>
+        </header>
 
-  <section class="input-panel">
-    <textarea id="text" placeholder="Paste your text here..." spellcheck="false"></textarea>
-    <div class="bar">
-      <button class="primary" id="go">Extract details</button>
-      <button id="sample">Try a sample</button>
-      <button id="clear">Clear</button>
-      <span class="count" id="count">0 characters</span>
+        <section class="input-panel">
+            <textarea id="text" placeholder="Paste your text here..." spellcheck="false"></textarea>
+            <div class="bar">
+                <button class="primary" id="go">Extract details</button>
+                <button id="sample">Try a sample</button>
+                <button id="clear">Clear</button>
+                <span class="count" id="count">0 characters</span>
+            </div>
+        </section>
+
+        <div class="status" id="status"></div>
+        <div id="results"></div>
     </div>
-  </section>
+    <div class="toast" id="toast"></div>
 
-  <div class="status" id="status"></div>
-  <div id="results"></div>
-</div>
-<div class="toast" id="toast"></div>
-
-<script>
-const SAMPLE = `Entrepreneurship Workshop | Techfest, IIT Bombay
+    <script>
+        const SAMPLE = `Entrepreneurship Workshop | Techfest, IIT Bombay
 Interested in exploring how an idea can be developed into a startup?
 Join us on 16th December 2026 at IIT Bombay for a session covering the startup journey - from identifying a problem and validating an idea to building an MVP, scaling, and pitching.
 \u{1F4CD} IIT Bombay
@@ -187,211 +556,212 @@ Register: techfest.org/workshops/entrepreneurship
 Techfest, IIT Bombay
 Asia\u2019s Largest Science & Technology Festival`;
 
-const TYPE_META = {
-  event:        { label: "Event",       color: "#7c8cff" },
-  internship:   { label: "Internship",  color: "#5eead4" },
-  hackathon:    { label: "Hackathon",   color: "#f9a8d4" },
-  job:          { label: "Job",         color: "#fbbf77" },
-  email_notice: { label: "Notice",      color: "#7dd3fc" },
-  other:        { label: "Info",        color: "#a3aac2" },
-};
+        const TYPE_META = {
+            event: { label: "Event", color: "#7c8cff" },
+            internship: { label: "Internship", color: "#5eead4" },
+            hackathon: { label: "Hackathon", color: "#f9a8d4" },
+            job: { label: "Job", color: "#fbbf77" },
+            email_notice: { label: "Notice", color: "#7dd3fc" },
+            other: { label: "Info", color: "#a3aac2" },
+        };
 
-const $ = (id) => document.getElementById(id);
-const textEl = $("text"), goBtn = $("go"), statusEl = $("status"), resultsEl = $("results");
-let lastData = null;
+        const $ = (id) => document.getElementById(id);
+        const textEl = $("text"), goBtn = $("go"), statusEl = $("status"), resultsEl = $("results");
+        let lastData = null;
 
-// ---------- tiny DOM helper (uses textContent, so no HTML injection) ----------
-function h(tag, attrs, ...kids) {
-  const el = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs || {})) {
-    if (v === null || v === undefined || v === false) continue;
-    if (k === "class") el.className = v;
-    else if (k === "text") el.textContent = v;
-    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
-    else el.setAttribute(k, v === true ? "" : v);
-  }
-  for (const kid of kids.flat()) {
-    if (kid === null || kid === undefined || kid === false) continue;
-    el.append(kid.nodeType ? kid : document.createTextNode(kid));
-  }
-  return el;
-}
+        // ---------- tiny DOM helper (uses textContent, so no HTML injection) ----------
+        function h(tag, attrs, ...kids) {
+            const el = document.createElement(tag);
+            for (const [k, v] of Object.entries(attrs || {})) {
+                if (v === null || v === undefined || v === false) continue;
+                if (k === "class") el.className = v;
+                else if (k === "text") el.textContent = v;
+                else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+                else el.setAttribute(k, v === true ? "" : v);
+            }
+            for (const kid of kids.flat()) {
+                if (kid === null || kid === undefined || kid === false) continue;
+                el.append(kid.nodeType ? kid : document.createTextNode(kid));
+            }
+            return el;
+        }
 
-function toast(msg) {
-  const t = $("toast"); t.textContent = msg; t.classList.add("show");
-  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1600);
-}
-async function copy(str, msg) {
-  try { await navigator.clipboard.writeText(str); toast(msg); }
-  catch { toast("Copy failed. Select and copy manually."); }
-}
+        function toast(msg) {
+            const t = $("toast"); t.textContent = msg; t.classList.add("show");
+            clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1600);
+        }
+        async function copy(str, msg) {
+            try { await navigator.clipboard.writeText(str); toast(msg); }
+            catch { toast("Copy failed. Select and copy manually."); }
+        }
 
-// ---------- evidence lookup ----------
-function evidenceFor(item, field) {
-  return (item.evidence || []).filter(e => e.field.toLowerCase().startsWith(field)).map(e => e.quote);
-}
-function withEv(item, field, node) {
-  const ev = evidenceFor(item, field);
-  if (!ev.length) return node;
-  const span = h("span", { class: "ev", title: "From the text: \u201C" + ev.join("\u201D, \u201C") + "\u201D" });
-  span.append(node);
-  return span;
-}
+        // ---------- evidence lookup ----------
+        function evidenceFor(item, field) {
+            return (item.evidence || []).filter(e => e.field.toLowerCase().startsWith(field)).map(e => e.quote);
+        }
+        function withEv(item, field, node) {
+            const ev = evidenceFor(item, field);
+            if (!ev.length) return node;
+            const span = h("span", { class: "ev", title: "From the text: \u201C" + ev.join("\u201D, \u201C") + "\u201D" });
+            span.append(node);
+            return span;
+        }
 
-// ---------- sections ----------
-function section(icon, title, body, wide) {
-  return h("div", { class: "sec" + (wide ? " wide" : "") }, h("h3", {}, h("span", { class: "ic", text: icon }), title), body);
-}
+        // ---------- sections ----------
+        function section(icon, title, body, wide) {
+            return h("div", { class: "sec" + (wide ? " wide" : "") }, h("h3", {}, h("span", { class: "ic", text: icon }), title), body);
+        }
 
-function renderWhen(item) {
-  if (!item.dates.length) return null;
-  const rows = item.dates.map(d => h("div", { class: "row" },
-    h("span", { class: "k", text: d.label }),
-    h("span", { class: "v" },
-      withEv(item, "date", document.createTextNode(d.readable || d.date || "Date unclear")),
-      d.time_readable ? h("small", { text: d.time_readable }) : null)));
-  return section("\u{1F4C5}", "When", h("div", {}, rows));
-}
+        function renderWhen(item) {
+            if (!item.dates.length) return null;
+            const rows = item.dates.map(d => h("div", { class: "row" },
+                h("span", { class: "k", text: d.label }),
+                h("span", { class: "v" },
+                    withEv(item, "date", document.createTextNode(d.readable || d.date || "Date unclear")),
+                    d.time_readable ? h("small", { text: d.time_readable }) : null)));
+            return section("\u{1F4C5}", "When", h("div", {}, rows));
+        }
 
-function renderWhere(item) {
-  if (!item.venue && !item.mode) return null;
-  const rows = [];
-  if (item.venue) rows.push(h("div", { class: "row" }, h("span", { class: "k", text: "Venue" }),
-    h("span", { class: "v" }, withEv(item, "venue", document.createTextNode(item.venue)))));
-  if (item.mode) rows.push(h("div", { class: "row" }, h("span", { class: "k", text: "Mode" }), h("span", { class: "v", text: item.mode })));
-  return section("\u{1F4CD}", "Where", h("div", {}, rows));
-}
+        function renderWhere(item) {
+            if (!item.venue && !item.mode) return null;
+            const rows = [];
+            if (item.venue) rows.push(h("div", { class: "row" }, h("span", { class: "k", text: "Venue" }),
+                h("span", { class: "v" }, withEv(item, "venue", document.createTextNode(item.venue)))));
+            if (item.mode) rows.push(h("div", { class: "row" }, h("span", { class: "k", text: "Mode" }), h("span", { class: "v", text: item.mode })));
+            return section("\u{1F4CD}", "Where", h("div", {}, rows));
+        }
 
-function renderMoney(item) {
-  if (!item.money.length) return null;
-  const rows = item.money.map(m => h("div", { class: "row" },
-    h("span", { class: "k", text: m.role }),
-    h("span", { class: "v" }, withEv(item, "money", document.createTextNode(m.amount)),
-      m.currency ? h("small", { text: m.currency }) : null)));
-  return section("\u{1F4B0}", "Money", h("div", {}, rows));
-}
+        function renderMoney(item) {
+            if (!item.money.length) return null;
+            const rows = item.money.map(m => h("div", { class: "row" },
+                h("span", { class: "k", text: m.role }),
+                h("span", { class: "v" }, withEv(item, "money", document.createTextNode(m.amount)),
+                    m.currency ? h("small", { text: m.currency }) : null)));
+            return section("\u{1F4B0}", "Money", h("div", {}, rows));
+        }
 
-function renderList(item, icon, title, key) {
-  if (!item[key].length) return null;
-  return section(icon, title, h("ul", { class: "plain" }, item[key].map(t => h("li", {}, withEv(item, key, document.createTextNode(t))))));
-}
+        function renderList(item, icon, title, key) {
+            if (!item[key].length) return null;
+            return section(icon, title, h("ul", { class: "plain" }, item[key].map(t => h("li", {}, withEv(item, key, document.createTextNode(t))))));
+        }
 
-function renderDetails(item) {
-  if (!item.details.length) return null;
-  return section("\u2728", "Details", h("div", {}, item.details.map(d => h("div", { class: "row" },
-    h("span", { class: "k", text: d.label }), h("span", { class: "v", text: d.value })))));
-}
+        function renderDetails(item) {
+            if (!item.details.length) return null;
+            return section("\u2728", "Details", h("div", {}, item.details.map(d => h("div", { class: "row" },
+                h("span", { class: "k", text: d.label }), h("span", { class: "v", text: d.value })))));
+        }
 
-function safeHref(url) { return /^https?:\/\//i.test(url) ? url : null; }
+        function safeHref(url) { return /^https?:\/\//i.test(url) ? url : null; }
 
-function renderLinks(item) {
-  if (!item.links.length) return null;
-  const links = item.links.map(l => h("a", { class: "link", href: safeHref(l.url), target: "_blank", rel: "noopener noreferrer" },
-    h("div", { class: "l1" }, l.label || l.domain, h("span", { text: "\u2197" })),
-    h("div", { class: "l2", text: "Leads to: " + l.directs_to }),
-    h("div", { class: "l3", text: l.url })));
-  return section("\u{1F517}", "Links", h("div", {}, links), true);
-}
+        function renderLinks(item) {
+            if (!item.links.length) return null;
+            const links = item.links.map(l => h("a", { class: "link", href: safeHref(l.url), target: "_blank", rel: "noopener noreferrer" },
+                h("div", { class: "l1" }, l.label || l.domain, h("span", { text: "\u2197" })),
+                h("div", { class: "l2", text: "Leads to: " + l.directs_to }),
+                h("div", { class: "l3", text: l.url })));
+            return section("\u{1F517}", "Links", h("div", {}, links), true);
+        }
 
-function renderContacts(item) {
-  if (!item.contacts.length) return null;
-  return section("\u{1F4DE}", "Contact", h("div", {}, item.contacts.map(c => h("div", { class: "row" },
-    h("span", { class: "k", text: c.kind }), h("span", { class: "v", text: c.value })))));
-}
+        function renderContacts(item) {
+            if (!item.contacts.length) return null;
+            return section("\u{1F4DE}", "Contact", h("div", {}, item.contacts.map(c => h("div", { class: "row" },
+                h("span", { class: "k", text: c.kind }), h("span", { class: "v", text: c.value })))));
+        }
 
-function renderActions(item) {
-  if (!item.actions.length) return null;
-  return section("\u2705", "To do", h("div", {}, item.actions.map(a =>
-    h("label", { class: "todo" }, h("input", { type: "checkbox" }), h("span", { text: a })))));
-}
+        function renderActions(item) {
+            if (!item.actions.length) return null;
+            return section("\u2705", "To do", h("div", {}, item.actions.map(a =>
+                h("label", { class: "todo" }, h("input", { type: "checkbox" }), h("span", { text: a })))));
+        }
 
-function renderSources(item) {
-  if (!item.evidence.length) return null;
-  return h("details", {}, h("summary", { text: "Source snippets (" + item.evidence.length + ")" }),
-    h("div", { class: "src" }, item.evidence.map(e => h("div", {}, h("b", { text: e.field + ": " }), "\u201C" + e.quote + "\u201D"))));
-}
+        function renderSources(item) {
+            if (!item.evidence.length) return null;
+            return h("details", {}, h("summary", { text: "Source snippets (" + item.evidence.length + ")" }),
+                h("div", { class: "src" }, item.evidence.map(e => h("div", {}, h("b", { text: e.field + ": " }), "\u201C" + e.quote + "\u201D"))));
+        }
 
-// ---------- plain text for copy ----------
-function toText(item) {
-  const L = [];
-  L.push(`${item.title}${item.organizer ? " | " + item.organizer : ""} (${(TYPE_META[item.type] || TYPE_META.other).label})`);
-  L.push(item.tldr);
-  if (item.urgency) L.push(`Status: ${item.urgency.text}`);
-  item.dates.forEach(d => L.push(`${d.label}: ${d.readable || d.date || "unclear"}${d.time_readable ? ", " + d.time_readable : ""}`));
-  if (item.venue) L.push(`Venue: ${item.venue}`);
-  if (item.mode) L.push(`Mode: ${item.mode}`);
-  item.money.forEach(m => L.push(`${m.role}: ${m.amount}`));
-  if (item.eligibility.length) L.push("Eligibility: " + item.eligibility.join("; "));
-  if (item.requirements.length) L.push("Requirements: " + item.requirements.join("; "));
-  item.details.forEach(d => L.push(`${d.label}: ${d.value}`));
-  item.links.forEach(l => L.push(`${l.label}: ${l.url} (${l.directs_to})`));
-  item.contacts.forEach(c => L.push(`${c.kind}: ${c.value}`));
-  if (item.actions.length) L.push("To do: " + item.actions.join("; "));
-  return L.join("\n");
-}
+        // ---------- plain text for copy ----------
+        function toText(item) {
+            const L = [];
+            L.push(`${item.title}${item.organizer ? " | " + item.organizer : ""} (${(TYPE_META[item.type] || TYPE_META.other).label})`);
+            L.push(item.tldr);
+            if (item.urgency) L.push(`Status: ${item.urgency.text}`);
+            item.dates.forEach(d => L.push(`${d.label}: ${d.readable || d.date || "unclear"}${d.time_readable ? ", " + d.time_readable : ""}`));
+            if (item.venue) L.push(`Venue: ${item.venue}`);
+            if (item.mode) L.push(`Mode: ${item.mode}`);
+            item.money.forEach(m => L.push(`${m.role}: ${m.amount}`));
+            if (item.eligibility.length) L.push("Eligibility: " + item.eligibility.join("; "));
+            if (item.requirements.length) L.push("Requirements: " + item.requirements.join("; "));
+            item.details.forEach(d => L.push(`${d.label}: ${d.value}`));
+            item.links.forEach(l => L.push(`${l.label}: ${l.url} (${l.directs_to})`));
+            item.contacts.forEach(c => L.push(`${c.kind}: ${c.value}`));
+            if (item.actions.length) L.push("To do: " + item.actions.join("; "));
+            return L.join("\n");
+        }
 
-// ---------- card ----------
-function renderCard(item) {
-  const meta = TYPE_META[item.type] || TYPE_META.other;
-  const parts = [
-    renderWhen(item), renderWhere(item), renderMoney(item),
-    renderList(item, "\u{1F393}", "Eligibility", "eligibility"),
-    renderList(item, "\u{1F4CB}", "Requirements", "requirements"),
-    renderDetails(item), renderContacts(item), renderActions(item), renderLinks(item),
-  ].filter(Boolean);
+        // ---------- card ----------
+        function renderCard(item) {
+            const meta = TYPE_META[item.type] || TYPE_META.other;
+            const parts = [
+                renderWhen(item), renderWhere(item), renderMoney(item),
+                renderList(item, "\u{1F393}", "Eligibility", "eligibility"),
+                renderList(item, "\u{1F4CB}", "Requirements", "requirements"),
+                renderDetails(item), renderContacts(item), renderActions(item), renderLinks(item),
+            ].filter(Boolean);
 
-  return h("article", { class: "card", style: `--tc:${meta.color}` },
-    h("div", { class: "card-top" },
-      h("span", { class: "badge", text: meta.label }),
-      item.urgency ? h("span", { class: "urg " + item.urgency.level, text: item.urgency.text }) : null,
-      h("span", { class: "spacer" })),
-    h("div", { class: "title", text: item.title }),
-    item.organizer ? h("div", { class: "org", text: item.organizer }) : null,
-    h("p", { class: "tldr", text: item.tldr }),
-    parts.length ? h("div", { class: "grid" }, parts) : h("div", { class: "empty", text: "No further details found in the text." }),
-    renderSources(item),
-    h("div", { class: "card-foot" },
-      h("button", { class: "small", onclick: () => copy(toText(item), "Copied as text") }, "Copy text"),
-      h("button", { class: "small", onclick: () => copy(JSON.stringify(item, null, 2), "Copied JSON") }, "Copy JSON")));
-}
+            return h("article", { class: "card", style: `--tc:${meta.color}` },
+                h("div", { class: "card-top" },
+                    h("span", { class: "badge", text: meta.label }),
+                    item.urgency ? h("span", { class: "urg " + item.urgency.level, text: item.urgency.text }) : null,
+                    h("span", { class: "spacer" })),
+                h("div", { class: "title", text: item.title }),
+                item.organizer ? h("div", { class: "org", text: item.organizer }) : null,
+                h("p", { class: "tldr", text: item.tldr }),
+                parts.length ? h("div", { class: "grid" }, parts) : h("div", { class: "empty", text: "No further details found in the text." }),
+                renderSources(item),
+                h("div", { class: "card-foot" },
+                    h("button", { class: "small", onclick: () => copy(toText(item), "Copied as text") }, "Copy text"),
+                    h("button", { class: "small", onclick: () => copy(JSON.stringify(item, null, 2), "Copied JSON") }, "Copy JSON")));
+        }
 
-function render(data) {
-  resultsEl.replaceChildren();
-  if (!data.items.length) { statusEl.replaceChildren(h("div", { class: "empty", text: "Nothing to extract from that text." })); return; }
-  resultsEl.append(
-    h("div", { class: "results-head" },
-      h("h2", { text: data.items.length === 1 ? "1 ITEM FOUND" : data.items.length + " ITEMS FOUND" }),
-      h("button", { class: "small", onclick: () => copy(JSON.stringify(data.items, null, 2), "Copied all JSON") }, "Copy all JSON")),
-    data.items.map(renderCard));
-}
+        function render(data) {
+            resultsEl.replaceChildren();
+            if (!data.items.length) { statusEl.replaceChildren(h("div", { class: "empty", text: "Nothing to extract from that text." })); return; }
+            resultsEl.append(
+                h("div", { class: "results-head" },
+                    h("h2", { text: data.items.length === 1 ? "1 ITEM FOUND" : data.items.length + " ITEMS FOUND" }),
+                    h("button", { class: "small", onclick: () => copy(JSON.stringify(data.items, null, 2), "Copied all JSON") }, "Copy all JSON")),
+                ...data.items.map(renderCard));
+        }
 
-// ---------- actions ----------
-async function extract() {
-  const text = textEl.value.trim();
-  if (!text) { statusEl.replaceChildren(h("div", { class: "error", text: "Please paste some text first." })); return; }
-  goBtn.disabled = true;
-  resultsEl.replaceChildren();
-  statusEl.replaceChildren(h("div", { class: "loading" }, h("div", { class: "spinner" }), "Reading your text..."));
-  try {
-    const res = await fetch("/api/extract", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.detail || "Something went wrong.");
-    lastData = data;
-    statusEl.replaceChildren();
-    render(data);
-  } catch (err) {
-    statusEl.replaceChildren(h("div", { class: "error", text: err.message }));
-  } finally {
-    goBtn.disabled = false;
-  }
-}
+        // ---------- actions ----------
+        async function extract() {
+            const text = textEl.value.trim();
+            if (!text) { statusEl.replaceChildren(h("div", { class: "error", text: "Please paste some text first." })); return; }
+            goBtn.disabled = true;
+            resultsEl.replaceChildren();
+            statusEl.replaceChildren(h("div", { class: "loading" }, h("div", { class: "spinner" }), "Reading your text..."));
+            try {
+                const res = await fetch("/api/extract", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.detail || "Something went wrong.");
+                lastData = data;
+                statusEl.replaceChildren();
+                render(data);
+            } catch (err) {
+                statusEl.replaceChildren(h("div", { class: "error", text: err.message }));
+            } finally {
+                goBtn.disabled = false;
+            }
+        }
 
-goBtn.addEventListener("click", extract);
-$("sample").addEventListener("click", () => { textEl.value = SAMPLE; updateCount(); extract(); });
-$("clear").addEventListener("click", () => { textEl.value = ""; updateCount(); statusEl.replaceChildren(); resultsEl.replaceChildren(); textEl.focus(); });
-textEl.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") extract(); });
-function updateCount() { $("count").textContent = textEl.value.length.toLocaleString() + " characters"; }
-textEl.addEventListener("input", updateCount);
-</script>
+        goBtn.addEventListener("click", extract);
+        $("sample").addEventListener("click", () => { textEl.value = SAMPLE; updateCount(); extract(); });
+        $("clear").addEventListener("click", () => { textEl.value = ""; updateCount(); statusEl.replaceChildren(); resultsEl.replaceChildren(); textEl.focus(); });
+        textEl.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") extract(); });
+        function updateCount() { $("count").textContent = textEl.value.length.toLocaleString() + " characters"; }
+        textEl.addEventListener("input", updateCount);
+    </script>
 </body>
+
 </html>
